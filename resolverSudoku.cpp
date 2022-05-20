@@ -9,93 +9,91 @@ typedef struct {
 	bool esPista;
 }Dato;
 
-typedef struct posiciones{
-	int px;
-	int py;
-}Posicion;
 
-
-
-void imprimirSudoku(Dato tablero[][9]){
-	for(int i=0;i<9;i++){
-		if(i==3 || i==6)
-		    printf("------------------------\n");
-		for(int j=0;j<9;j++){
-			if(j==3 || j==6)
-			    printf(" |");
-			printf(" %d",tablero[i][j].valor);
-		}
-		printf("\n");
-	}
+int limCaja(int x){
+	if(x<3)
+		return 0;
+	else if(x<6)
+		return 3;
+	else
+		return 6;
 }
 
-int limite(int p){
-	int a;
-	for(a=3;a<=p;a+=3);
-	return a-3;
-}
-
-void avanzar(Dato tablero[][9],Posicion *p){
-    do{
-    	if(p->py==8){
-    		p->py=0;
-    		p->px++;
-    		if(p->px==9)
-    		    return;
-		}else
-		    p->py++;	
-	}while(tablero[p->px][p->py].esPista);
-}
-
-void retroceder(Dato tablero[][9],Posicion *p){
-	do{
-		if(p->py==0){
-			p->py=8;
-			p->px--;
-			if(p->px==-1)
-			    return;
-		}else
-		    p->py--;
-	}while(tablero[p->px][p->py].esPista);
-}
-
-bool validar(Posicion P,Dato tablero[][9],int x){
-	for (int i=0;i<9;i++)
-		if(tablero[P.px][i].valor==x || tablero[i][P.py].valor==x)
-			return true;
-	int limX=limite(P.px);
-	int limY=limite(P.py);
-	for(int i=limX;i<limX+3;i++)
-	    for(int j=limY;j<limY+3;j++)
-	        if(tablero[i][j].valor==x)
-	            return false;
+bool validar(Dato tablero[9][9],int px,int py,int x){
+	//fila y colummna
+	for (char i = 0;i<9;i++)
+		if(tablero[px][i].valor == x || tablero[i][py].valor == x)
+			return false;
+	
+	int ly,lx;
+	lx = limCaja(px);
+	ly = limCaja(py);
+	for (char i = lx;i<lx+3;i++)
+		for (char j = ly;j<ly+3;j++)
+			if(tablero[i][j].valor == x)
+				return false;
 	return true;
 }
 
-void llenarSudoku(Dato tablero[][9]){
-	Posicion P;
-	P.px=P.py=0;
-	int x=1;
-	while(P.px<9){
-		if(x>9){
-			tablero[P.px][P.py].valor=0;
-			retroceder(tablero,&P);
-			if(P.px==9)
+void avanzar(Dato tablero[9][9],int &px,int &py){
+	do{
+		if(py == 8){
+			py = 0;
+			px++;
+			if(px==9)
 				return;
-			x=tablero[P.px][P.py].valor;
+		}else
+			py++;
+	}while(tablero[px][py].esPista);
+}
+
+void retroceder(Dato tablero[9][9],int &px,int &py){
+	do{
+		if(py == 0){
+			py = 8;
+			px--;
+			if(px==-1)
+				return;
+		}else
+			py--;
+	}while(tablero[px][py].esPista);
+}
+
+
+bool resolver(Dato tablero[9][9]){
+	int px = 0, py = 0, x = 1;
+	avanzar(tablero,px,py);
+	if(px==9)
+		return true;
+	while(true){
+		//printf("px:%d   py:%d \n",px,py);
+		if(x==10){
+			tablero[px][py].valor = 0;
+			retroceder(tablero,px,py);
+			if(px == -1)
+				return false;
+			x = tablero[px][py].valor;
 			x++;
-			tablero[P.px][P.py].valor=0;
-		}else if(validar(P,tablero,x)){
-			tablero[P.px][P.py].valor=x;
-			avanzar(tablero,&P);
-			if(P.px=9);
-			x=0;
+			tablero[px][py].valor = 0;
+		}else if(validar(tablero,px,py,x)){
+			tablero[px][py].valor = x;
+			avanzar(tablero,px,py);
+			if(px == 9)
+				return true;
+			x = 1;
 		}else
 			x++;
 	}
 }
 
-void mat0x0(int mat[][9]){
+
+
+int aNumero(char x){
+	return x-48;
+}
+
+
+void mat0x0(char mat[][9]){
 	for(int j=0;j<9;j++){
 		for(int i=0;i<9;i++){
 			mat[j][i]=0;
@@ -122,7 +120,6 @@ char leerNumero(){
 	}
 }
 
-
 void leerMatriz(char matlet[][9]){
 	printf("   1 2 3   4 5 6   7 8 9\n\n");
 	for(int i=0;i<9;i++){
@@ -141,10 +138,6 @@ void leerMatriz(char matlet[][9]){
 	
 }
 
-int aNumero(char x){
-	return x-48;
-}
-
 void transformar(Dato mat[][9],char matAux[][9]){
 	int x;
 	for(int i=0;i<9;i++){
@@ -154,17 +147,25 @@ void transformar(Dato mat[][9],char matAux[][9]){
 				mat[i][j].valor=x;
 				mat[i][j].esPista=false;
 			}else{
-				mat[i][j].valor=(-x);
+				mat[i][j].valor=(x);
 				mat[i][j].esPista=true;
 			}
 		}
 	}
 }
 
-
-
-
-
+void imprimirSudoku(Dato tablero[][9]){
+	for(int i=0;i<9;i++){
+		if(i==3 || i==6)
+		    printf("------------------------\n");
+		for(int j=0;j<9;j++){
+			if(j==3 || j==6)
+			    printf(" |");
+			printf(" %d",tablero[i][j].valor);
+		}
+		printf("\n");
+	}
+}
 
 void inicio(int mat[][9]){
 	bool band=true;
@@ -186,7 +187,13 @@ int main(void){
    leerMatriz(matriz);
    Dato tablero[9][9];
    transformar(tablero,matriz);
-   llenarSudoku(tablero);
+   printf("\n\n");
+   imprimirSudoku(tablero);
+   printf("\n\n");
+   if(resolver(tablero))
+   		printf("\ntrue\n");
+   	else
+   		printf("false");
    printf("\n\n");
    imprimirSudoku(tablero);
 }

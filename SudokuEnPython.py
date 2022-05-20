@@ -1,13 +1,10 @@
 
+'''
+Programa que resuleve un sudoku de tamaño 9x9 con un algoritmo iterativo
 
-#  camnio en el plan de accion ahora vamos a tratar a cada caja como una nueva matriz
-#  habra que conformarla al llamar la funcion
-#  no se que otras consecuencias tenga este cambio
-    
-#evalua la validez de un posible numero a ingresa en una caja, fila o columna
+para solucionar el sudoku este debe estar con casillas en calor 0 donde pueda iterar el algoritmo
 
-
-from pickle import FALSE, TRUE
+'''
 
 
 def rangoSublista(x):
